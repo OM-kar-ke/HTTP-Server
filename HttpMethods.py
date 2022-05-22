@@ -282,3 +282,57 @@ class HttpMethods():
 		r += b"\r\n"
 
 		return r
+
+	def handle_DELETE(self, request):
+		
+		# remove the slash from the start and end of request URI(becos of the os.path.exists() function)
+		filename = request.uri.strip('/')
+
+		# This is variable by which server decides to send which response code(200 or 202 or 204)
+		status_var = int(config['del_meth']['resp_code_del'])
+		
+		if os.path.exists(filename):
+			      
+			if (status_var == 200):
+      
+				os.remove(filename)
+	
+				respon_line = response_line(status_code=200)
+				respon_headers = response_headers()
+				respon_body = b"<h1>File Deleted.</h1>"
+    
+				
+	
+			elif (status_var == 204):
+      
+				os.remove(filename)
+	
+				respon_line = response_line(status_code=204)
+				respon_headers = response_headers()
+				respon_body = b""		#body should be empty
+    
+
+			#TO DO
+			elif (status_var == 202):
+
+				# TO DO -> when to hold/wait for deletion(means what server does if it is sendin ACCEPTED response)
+				# os.remove(filename)
+	
+				respon_line = response_line(status_code=202)
+				respon_headers = response_headers()
+				respon_body = b"<h1>File will get deleted.</h1>"
+				
+
+		#when os path does not exists
+		else:
+      
+			respon_line = response_line(status_code=404)
+			respon_headers = response_headers()
+			respon_body = b"<h1>File requested for deletion Not Found.</h1>"
+
+
+		respon_headers = cookie_funcationality_in_method(request, respon_headers)
+		respon_headers = connection_parameters_headers_append(request, respon_headers)
+
+		blank_line = b"\r\n"
+		return b"".join([respon_line, respon_headers, blank_line, respon_body])
