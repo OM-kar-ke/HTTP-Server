@@ -28,6 +28,58 @@ class HttpRequest:
 		self.parse(data)
 
 
+	# data is the HTTP request made by the client
+	def parse(self, data):
+		try:
+			# To remove LWS from beggining and end of the data 
+			data = data.strip(b" ")
+			
+			#Created a List where each element contains a line from request made by client 
+			lines = data.split(b"\r\n")
+
+			#First line of request is request line 
+			request_line = lines[0]
+
+			#Request-Line = Method SP Request-URI SP HTTP-Version CRLF
+			words = request_line.split(b" ")
+
+			#Extracting method , uri , http version from the request line
+			self.method = words[0].decode() # call decode to convert bytes to str
+			self.uri = words[1].decode() 
+			self.http_version = words[2].decode()
+
+
+			# Removed request line from the request
+			lines = lines[1:]
+
+
+			# find the index for the blank line  ,so we can separate the headers and the message body
+			blank_line_index = 0
+			for l in lines:
+				if (l == b""):
+					break
+				blank_line_index += 1
+
+
+			# collected the message body and store it in a list
+			for m in lines[blank_line_index+1:]:
+				self.request_msg.append(m.decode())
+
+
+			# collected all the headers (All Headers present before the blank line)
+			request_headers = lines[:blank_line_index]
+
+
+			# created a dictonary for headers to eaisly access the headers and values for the headers  
+			for i in request_headers:
+				entry = i.split(b":")
+				self.req_headers_dict[entry[0].decode().strip()] = entry[1].decode().strip()
+
+
+		except Exception as e:
+			pass
+
+
 
 
 
