@@ -88,7 +88,114 @@ class HttpMethods():
 					with open(filename, 'rb') as f:
 						respon_body = f.read()
 
+            # We are comparing If-Range header only with dates and not with Etag for now.
+			#When If-Range header is present in the request.
+			elif ('If-Range' in request.req_headers_dict.keys()):
+       
+				if (compare_dates(last_modified(request.uri), request.req_headers_dict['If-Range'])):			
+					
+					#When If-Range present and Range header also present.
+					if('Range' in request.req_headers_dict.keys()):
+			
+						range_list = parse_range(request.req_headers_dict['Range'])
+						res = validate_ranges(range_list, length_of_resource)
+
+						# When specified ranges are not valid(overlapping or out of bound).
+						if(res == False):
+							#send response code 416
+							respon_line = response_line(status_code=416)
+							respon_headers = response_headers(request, {'Content-Range' : '*/' + str(length_of_resource)})
+							respon_body = b"<h1>Not valid ranges</h1>"
+
+						# When specified ranges are valid.
+						else :
+							respon_line = response_line(status_code=206)
+							respon_headers = response_headers(request)
+
+							# fetch that much file bytes and append it in response body.
+							f1 = open(request.uri.strip("/"), "rb")
+							count_of_bytes = 0
+							range_list.sort(key = lambda x : x[0])
+							respon_body = b""
+							while count_of_bytes <= length_of_resource:
+				
+								flag = 0
+								byte = f1.read(1)
+								count_of_bytes += 1
+								for i in range_list:
+				
+									if (i[0] == ""):
+										i[0] = 0
+									if (i[1] == ""):
+										i[1] = length_of_resource
+				
+									if (count_of_bytes >= int(i[0]) and count_of_bytes <= int(i[1]) ):
+										flag = 1
+								
+								if flag == 1:
+									respon_body += byte
+
+					#when If-Range present and Range header is not present.
+					else :
+
+						respon_line = response_line(status_code=200)
+
+						respon_headers = response_headers(request)
+
+						with open(filename, 'rb') as f:
+								respon_body = f.read()
+
+				#When compare_date() returns False that is Range cannot be suceeded as resource has been modified.
+				else :
+					
+					respon_line = response_line(status_code=200)
+
+					respon_headers = response_headers(request)
+
+					with open(filename, 'rb') as f:
+							respon_body = f.read()
+        
+			#when If-Range is not present but Range header is present
+			elif ('Range' in request.req_headers_dict.keys()):
+
+				range_list = parse_range(request.req_headers_dict['Range'])
+				res = validate_ranges(range_list, length_of_resource)
+			
+				if(res == False):
+					#send response code 416
+					respon_line = response_line(status_code=416)
+					respon_headers = response_headers(request, {'Content-Range' : '*/' + str(length_of_resource)})
+					respon_body = b"<h1>Not valid ranges</h1>"
      
+				else :
+
+					respon_line = response_line(status_code=206)
+					respon_headers = response_headers(request)
+
+					# fetch that much file bytes and append it in response body.
+					f1 = open(request.uri.strip("/"), "rb")
+					count_of_bytes = 0
+					range_list.sort(key = lambda x : x[0])
+					respon_body = b""
+					while count_of_bytes <= length_of_resource:
+				
+						flag = 0
+						byte = f1.read(1)
+						count_of_bytes += 1
+						for i in range_list:
+				
+							if (i[0] == ""):
+								i[0] = 0
+							if (i[1] == ""):
+								i[1] = length_of_resource
+				
+							if (count_of_bytes >= int(i[0]) and count_of_bytes <= int(i[1]) ):
+								flag = 1
+								
+						if flag == 1:
+							respon_body += byte
+   
+    
 			#when both If-Range and Range headers are not present
 			else :
 				
