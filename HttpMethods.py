@@ -241,13 +241,21 @@ class HttpMethods():
 				if (Encoding_not_avaliable == 1):
 					# respon_line = response_line(status_code=406)
 					pass
+
+   
+			content_length = len(respon_body)
+			respon_headers = append_additional_header(respon_headers,'Content-Length', content_length)
+
     
      	#if resource is not present.			
 		else:
 			respon_line = response_line(status_code=404)
 			respon_headers = response_headers(request)
 			respon_body = b"<h1>404 Not Found</h1>"
-   
+
+		respon_headers = cookie_funcationality_in_method(request, respon_headers)
+		respon_headers = connection_parameters_headers_append(request, respon_headers)
+
 		blank_line = b"\r\n"
 		r = b"".join([respon_line, respon_headers, blank_line, respon_body])
 		return r

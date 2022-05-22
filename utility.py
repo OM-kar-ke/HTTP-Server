@@ -9,6 +9,110 @@ import json
 import gzip
 import zlib
 
+# Add new cookie with count=1 in our server's cookie file
+# Called by set_cookie method
+def add_cookie(random_id, user_agent):
+    
+    try:
+    
+        #Open cookie file and read data
+        with open("cookie.json") as json_file:
+            json_decoded = json.load(json_file)
+        
+        value = {"user-agent" : user_agent, "count" : 1}
+        
+
+        #Add the above key-value pair to the content of json file.
+        json_decoded[random_id] = value
+        
+        #Write in cookie file
+        with open("cookie.json", 'w') as json_out_file:
+            json.dump(json_decoded, json_out_file)
+            
+    except json.JSONDecodeError:
+        pass
+
+# Generate random, unique alphanumeric string(length=9) as cookie id and add it to server's cookie file
+# Its called by cookie functionality method , and it returns the cookie id and its expiration date_time(1 day ahead of current date_time) 
+# It gives a call to add cookie to add new clients cookie to the server cookie file
+def set_cookie(request):
+    
+    # number of characters in the string.
+    n = 9
+    
+    #generate random alphanumeric string of length = n, here n=9.
+    random_id = ''.join(random.choices(string.ascii_lowercase + string.digits, k = n))
+    
+    #Now calculate the cookie expiry date and time.
+    expiry = get_date_and_time(False)
+
+    #Find the user agent from request headers
+    user_agent = request.req_headers_dict['User-Agent']
+    
+    # #Now create the value for Set-Cookie response header 
+    # value = "user-agent=" + user_agent + "; count=1"
+    
+    
+    #Append the cookie info in cookie file.
+    add_cookie(random_id, user_agent)
+    
+    #Return data to be sent in Set-Cookie header
+    r = "id=" + random_id + "; Expires=" + expiry.decode() 
+    
+    return r
+
+#Increment the cookie count by one for the specific cookie id extracted from the request header
+def update_cookie(request):
+    
+    try:
+    
+        #First find the user agent from request headers
+        cookies_in_request = request.req_headers_dict['Cookie'].split(";")
+        
+        # print(cookies_in_request)
+        # print(type(cookies_in_request))
+        
+        with open("cookie.json") as json_file:
+            json_decoded = json.load(json_file)
+        
+        # For cookie in request header, see if that is present in server's cookie file.
+        for key in cookies_in_request:
+            
+            key.strip()
+            key = key.split("=")
+            key = key[1]
+            # print(key)
+            
+            #if cookie is present in request, increment the count
+            if (key in json_decoded.keys()):
+                
+                #Increase the count for that specific cookie
+                value_dict = json_decoded[key]
+                n = value_dict["count"]
+                value_dict["count"] = n + 1
+                
+        with open("cookie.json", 'w') as json_out_file:
+            json.dump(json_decoded, json_out_file)
+
+    except json.JSONDecodeError:
+        pass
+
+# If cookie is in request header of client , it updates the cookie by giving call to update_cookie method
+# If cookie is not in request header of client , 
+    # A)it sets the cookie by giving call to set_cookie method
+    # B)it also sends set-cookie header in response
+def cookie_funcationality_in_method(request, respon_headers):
+    #If Cookie header is present in request
+    if ('Cookie' in request.req_headers_dict.keys()):
+        update_cookie(request)
+		
+    #If Cookie header is not present in request
+    else :
+        cookie = set_cookie(request)
+        respon_headers = append_additional_header(respon_headers, 'Set-Cookie', cookie)
+
+    return respon_headers
+    
 #It appends Connection and Keep-alive header to response headers, if they are present in request headers(with same values as of request headers)
 def connection_parameters_headers_append(request, respon_headers):
     if ('Connection' in request.req_headers_dict.keys()):
