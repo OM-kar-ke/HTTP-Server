@@ -260,3 +260,25 @@ class HttpMethods():
 		r = b"".join([respon_line, respon_headers, blank_line, respon_body])
 		return r
 
+	def handle_HEAD(self, request) :
+	
+		GET_response = self.handle_GET(request)
+
+		# Remove body from reponse returned by handle_GET() function 
+		headers_list = GET_response.split(b"\r\n")
+		blank_line_index = 0
+		for l in headers_list:
+			if (l == b""):
+				break
+			blank_line_index += 1
+  
+		r = b""
+
+		# append all the GET reponse headers to the response(initially empty) byte string
+		for m in headers_list[:blank_line_index]:
+			r += m + b"\r\n"
+
+		#blank line after headers
+		r += b"\r\n"
+
+		return r
