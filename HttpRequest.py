@@ -27,7 +27,6 @@ class HttpRequest:
 		# call self.parse() method to parse the request data
 		self.parse(data)
 
-
 	# data is the HTTP request made by the client
 	def parse(self, data):
 		try:
@@ -79,7 +78,45 @@ class HttpRequest:
 		except Exception as e:
 			pass
 
+	# Returns a list of connection_parameter(which we saw in run method of ClientTheread class)
+	# connection_parameters = [connection, keep_alive]
+	#Connection: keep-alive/close
+	# keep_alive = [timeout, max]
+	def get_connection_parameters(self):
+		
+		lst = [[None], [None, None]]
+  
+		if ('Connection' in self.req_headers_dict.keys()) :
+			
+			#Connection: keep-alive/close
+			conn_value =  self.req_headers_dict['Connection']
+			lst[0][0] = conn_value
 
+   
+			if (conn_value == 'keep-alive'):
+
+				# keep_alive = [timeout, max]
+				if ('Keep-Alive' in self.req_headers_dict.keys()) :
+					
+					param = self.req_headers_dict['Keep-Alive']
+					param = param.split(",")
+
+					par1 = param[0]
+					p1 = par1.split('=')
+					if (p1[0].strip() == 'timeout'):
+						lst[1][0] = p1[1]
+					elif (p1[0].strip() == 'max'):
+						lst[1][1] = p1[1]
+
+					if (len(param) != 1):
+						par2 = param[1]
+						p2 = par2.split('=')
+						if (p2[0].strip() == 'timeout'):
+							lst[1][0] = p2[1]
+						elif (p2[0].strip() == 'max'):
+							lst[1][1] = p2[1]
+
+		return lst 
 
 
 
