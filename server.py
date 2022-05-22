@@ -11,9 +11,9 @@ class TCP:
 		try:
 			self.port = int(sys.argv[1])
 		except Exception as e:
-			self.port = 12000
+			self.port = int(config['TCP']['port'])
 
-    #server starts on calling the start_tcp function
+	#server starts on calling the start_tcp function
 	def start_tcp(self):
      
 		# create a TCP socket object for listening to TCP requests
@@ -58,7 +58,16 @@ class TCP:
 class ClientThread(Thread):
     pass
 
+#Instances of this class are created every time server receives a connection request.
+class ClientThread(Thread):
 
+	def __init__(self, conn, ip, port): 
+		Thread.__init__(self)
+		self.conn = conn 
+		self.ip = ip 
+		self.port = port 
+		print ("New server socket thread started for " + ip + ":" + str(port), '\n')
+ 
 
 if __name__ == '__main__':
     tcp_server = TCP()
