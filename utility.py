@@ -9,6 +9,15 @@ import json
 import gzip
 import zlib
 
+#It appends Connection and Keep-alive header to response headers, if they are present in request headers(with same values as of request headers)
+def connection_parameters_headers_append(request, respon_headers):
+    if ('Connection' in request.req_headers_dict.keys()):
+        respon_headers = append_additional_header(respon_headers, 'Connection', request.req_headers_dict['Connection'])
+        if ('Keep-Alive' in request.req_headers_dict.keys()):
+            respon_headers = append_additional_header(respon_headers, 'Keep-Alive', request.req_headers_dict['Keep-Alive'])
+    
+    return respon_headers
+
 #This function appends new header and its value to already existing headers
 def append_additional_header(headers, additional_header_name, additional_header_value):
     
