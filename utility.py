@@ -1,5 +1,18 @@
+import os
 import datetime
 from datetime import timedelta
+import time
+import stat
+
+
+  
+#This function appends new header and its value to already existing headers
+def append_additional_header(headers, additional_header_name, additional_header_value):
+    
+    headers = headers.decode()
+    headers += "%s: %s\r\n" % (additional_header_name, additional_header_value)
+    return headers.encode()
+
 
 
 #To get the value for Date Header Field
@@ -65,3 +78,11 @@ def last_modified(path) :
 	msg = l[0] + ", " + l[2] + " " + l[1] + " " + l[4] + " "+ l[3] + " GMT"
  
 	return msg
+
+ 
+#Compares dates, return true when date1 < date2 else false 
+def compare_dates(date1, date2):
+    #TO DO : complete the function
+    return True
+
+

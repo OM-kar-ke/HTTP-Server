@@ -1,12 +1,5 @@
-import socket
-import sys
-from threading import Thread
-import threading
+from HttpMethods import *
 
-class HttpMethods:
-    
-    def handle_request():
-        pass
 
 class TCP:
     
