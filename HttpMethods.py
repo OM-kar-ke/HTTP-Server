@@ -221,6 +221,30 @@ class HttpMethods():
 			respon_headers = append_additional_header(respon_headers,'Content-Type', content_type)
 			
 
+
+			if ('Accept-Encoding' in request.req_headers_dict.keys()) :
+			
+				value_list = request.req_headers_dict['Accept-Encoding'].split(',')
+
+				Encoding_not_avaliable = 1
+				for i in value_list :
+					if (i in Avalaible_Content_Encoding_on_server):
+						
+						Encoding_not_avaliable = 0
+						respon_headers = append_additional_header(respon_headers,'Content-Encoding', i)
+		
+						#carry out that content encoding on the response body
+						respon_body = Content_Encoding(respon_body, i)
+						
+						break
+				
+				#TO DO : which status code to send in response ???
+				#When none of the requested encodings are available on the server. 
+				if (Encoding_not_avaliable == 1):
+					# respon_line = response_line(status_code=406)
+					pass
+
+
 			content_length = len(respon_body)
 			respon_headers = append_additional_header(respon_headers,'Content-Length', content_length)
 
