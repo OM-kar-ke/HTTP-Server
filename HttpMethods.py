@@ -337,7 +337,6 @@ class HttpMethods():
 		blank_line = b"\r\n"
 		return b"".join([respon_line, respon_headers, blank_line, respon_body])
 
-
 	def handle_POST(self, request):
 		response = self.handle_Post_Put(request, "post")
 		return response
