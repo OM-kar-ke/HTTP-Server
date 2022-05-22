@@ -3,9 +3,12 @@ import datetime
 from datetime import timedelta
 import time
 import stat
+import string    
+import random # To generate random alphanumeric string (for cookie)
+import json
+import gzip
+import zlib
 
-
-  
 #This function appends new header and its value to already existing headers
 def append_additional_header(headers, additional_header_name, additional_header_value):
     
@@ -79,10 +82,49 @@ def last_modified(path) :
  
 	return msg
 
+
+#To parse Range header. And storing the list of ranges i.e.[start, end] in a list.
+def parse_range(value):
+    
+	value=value.split('=',1)
+	value = value[1]
+	value=value.split(',')
+
+	res=[]
+	#3 cases are possible here st-end , st- , -end
+	for i in value :
+		i=i.split('-')
+		i[0] = i[0].strip()
+		i[1] = i[1].strip()
+		res.append([i[0],i[1]])
+
+	#returning list of ranges(also a list of length 2)
+	return res
+
+
+#TO DO : validate the ranges by : check if any 2 pair of range overlap or not,
+# check if range lies in 0 - length_of_resource
+def validate_ranges(pairs_of_ranges, lenth_of_resource):
+    
+	
+	return True
+	
  
 #Compares dates, return true when date1 < date2 else false 
 def compare_dates(date1, date2):
     #TO DO : complete the function
     return True
 
+
+#This functions carry out the encoding passed as parameter on the body and returns the encoded body.
+def Content_Encoding(response, encoding):
+    
+    if (encoding == 'gzip'):
+        response = gzip.compress(response)
+    
+    elif (encoding == 'deflate'):
+        response = zlib.compress(response)
+        
+    # print(response)
+    return response
 

@@ -40,7 +40,6 @@ class HttpMethods():
 		respon_body = b"<h1>501 Not Implemented</h1>"
 		return b"".join([respon_line, respon_headers, blank_line, respon_body])
 	
- 	
 	def handle_GET(self, request) :
      
 		#Remove the slash from begining and end of the request URI for os.path.exists() function becos this is the function's requirement.
@@ -88,7 +87,8 @@ class HttpMethods():
 					with open(filename, 'rb') as f:
 						respon_body = f.read()
 
-            # We are comparing If-Range header only with dates and not with Etag for now.
+     
+			# We are comparing If-Range header only with dates and not with Etag for now.
 			#When If-Range header is present in the request.
 			elif ('If-Range' in request.req_headers_dict.keys()):
        
@@ -195,7 +195,6 @@ class HttpMethods():
 						if flag == 1:
 							respon_body += byte
    
-    
 			#when both If-Range and Range headers are not present
 			else :
 				
@@ -221,7 +220,6 @@ class HttpMethods():
 			respon_headers = append_additional_header(respon_headers,'Content-Type', content_type)
 			
 
-
 			if ('Accept-Encoding' in request.req_headers_dict.keys()) :
 			
 				value_list = request.req_headers_dict['Accept-Encoding'].split(',')
@@ -243,20 +241,14 @@ class HttpMethods():
 				if (Encoding_not_avaliable == 1):
 					# respon_line = response_line(status_code=406)
 					pass
-
-
-			content_length = len(respon_body)
-			respon_headers = append_additional_header(respon_headers,'Content-Length', content_length)
-
     
      	#if resource is not present.			
 		else:
 			respon_line = response_line(status_code=404)
 			respon_headers = response_headers(request)
 			respon_body = b"<h1>404 Not Found</h1>"
-
+   
 		blank_line = b"\r\n"
 		r = b"".join([respon_line, respon_headers, blank_line, respon_body])
 		return r
-
 
