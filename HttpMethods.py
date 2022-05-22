@@ -336,3 +336,150 @@ class HttpMethods():
 
 		blank_line = b"\r\n"
 		return b"".join([respon_line, respon_headers, blank_line, respon_body])
+
+
+	def handle_POST(self, request):
+		response = self.handle_Post_Put(request, "post")
+		return response
+
+	def handle_PUT(self, request):
+		response = self.handle_Post_Put(request, "put")
+		return response
+
+	def handle_Post_Put(self, request, method):
+		# remove the slash from the request URI
+			filename = request.uri.strip('/')
+
+			con_type, encoding = mimetypes.MimeTypes().guess_type(filename)
+
+			content_type = request.req_headers_dict['Content-Type']
+
+			#When uri does not have content(resource) type in it.
+			if (con_type == None):
+	
+				if (content_type == 'text/plain') :
+					c_type = '.txt'		
+
+				elif (content_type == 'text/html') :
+					c_type = '.html'
+				
+				elif (content_type == 'application/javascript'):
+					c_type = '.js'
+	
+				elif (content_type == 'application/json'):
+					c_type = '.json'
+
+				elif (content_type == 'application/xml'):
+					c_type = '.xml'
+	
+				elif (content_type == 'application/x-www-form-urlencoded') :
+					c_type = '.json'
+					msg_body = request.request_msg
+					msg_body = msg_body[0].split('&')
+
+	
+				filename += c_type
+			
+			# If the file exists
+			if os.path.exists(filename):
+
+				#If the content type is json then message body of request has key-value pair format seperated by '&'
+				if (con_type == 'application/json' and content_type == 'application/x-www-form-urlencoded'):
+
+					data = request.request_msg
+		
+					json_decoded = {}
+
+					if (method == "post"):
+						with open(filename) as json_file:
+							json_decoded = json.load(json_file)
+		
+					for d in data:
+						d = d.split("&")
+						for k_v in d:
+							k_v = k_v.split("=")
+							json_decoded[k_v[0]] = k_v[1]
+					
+     
+					with open(filename, "w") as file:
+						json.dump(json_decoded, file)
+
+					file.close()
+				
+				#If content type is of txt/html then message body has simple format.
+				else :
+					
+					if (method == "post"):
+						file1 = open(filename, 'a')
+					
+					# method is put
+					else :
+						file1 = open(filename, 'w')
+
+					for l in request.request_msg:
+						l += "\n"
+						file1.write(l)
+					
+					file1.close()
+  
+  
+				respon_line = response_line(status_code=200)
+				respon_headers = response_headers()
+				respon_body = b"<h1>Data is stored/appended in the server</h1>"
+			
+			# If the file dosen't exist
+			else :
+				
+				# file not located and request does not have message
+				if (len(request.req_headers_dict['Content-Length']) == 0):
+					respon_line = response_line(status_code=204)
+					respon_body = b"<h1>Request has no body.</h1>"
+					respon_headers = response_headers()
+
+				# file not located but request has message 
+				else :
+
+					#If the content type is json then message body of request has key-value pair format seperated by '&'
+					if (con_type == 'application/json' and content_type == 'application/x-www-form-urlencoded'):
+						
+						data = request.request_msg
+		
+						dict = {}
+			
+						for d in data:
+							d = d.split("&")
+							for k_v in d:
+								k_v = k_v.split("=")
+								dict[k_v[0]] = k_v[1]
+		
+						with open(filename, "w") as write_file:
+							json.dump(dict, write_file)
+						
+						write_file.close()
+ 
+				
+					#If content type is of raw(txt, html) then message body has simple format.
+					else :
+			
+						file2 = open(filename, 'w')
+						for l in request.request_msg:
+							l += "\n"
+							file2.write(l)
+
+						file2.close()
+
+
+					respon_line = response_line(status_code=201)
+					respon_body = b"<h1>Resource is created and data is stored in the server.</h1>"
+					respon_headers = response_headers()
+					respon_headers = append_additional_header(respon_headers, 'Location', '/'+filename)
+
+			respon_headers = append_additional_header(respon_headers, 'Last-Modified', last_modified(filename))
+			respon_headers = cookie_funcationality_in_method(request, respon_headers)
+			respon_headers = connection_parameters_headers_append(request, respon_headers)
+
+
+			blank_line = b"\r\n"				
+
+			return b"".join([respon_line, respon_headers, blank_line, respon_body])
+	
