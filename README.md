@@ -2,7 +2,7 @@
 	<h1>Http Server</h1>
 </div>
 <div align="center">
-   <img align="center" width=40% src="assets/server.png" >
+   <img align="center" width=80% src="assets/server.png" >
 </div>
 
 ---
