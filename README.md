@@ -10,12 +10,10 @@
 ## Contents
 
 - [About](#about)
-- [Usage](#usage)
+- [Building](#building)
 - [Configuration](#configuration)
 - [Implementation Details](#implementation_details)
 - [Running Tests](#tests)
-- [Connection Request](#onnection_request)
-- [Built Using](#built_using)
 - [Resources](#resources)
 
 ## About
@@ -135,7 +133,7 @@ For old User-Agent, server increments the cookie count sent by that User-Agent i
 All the server resources are in the `/resources` directory. For this resources clients can make requests to the server.
 You can add/delete the resources on the server.
 
-## 🔧 Running Tests
+## Running Tests
 
 Automated test scripts to test the specified functionalities can be found in the `/Test` directory. Before running any of the tests, first start the server.
 
